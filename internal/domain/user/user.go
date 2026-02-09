@@ -3,10 +3,8 @@ package user
 import "time"
 
 type User struct {
-	ID        string
-	Name      string
-	AvatarURL string
-	Bio       string
+	ID        int64
+	Login     string
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
