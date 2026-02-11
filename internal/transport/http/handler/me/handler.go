@@ -1,33 +1,35 @@
-package handler
+package me
 
 import (
 	"encoding/json"
 	"net/http"
-
-	"github.com/aygumov-g/service-users-go/internal/service/user"
-	"github.com/aygumov-g/service-users-go/internal/transport/http/middleware"
 )
 
 type Handler struct {
-	users user.Service
+	users    UserService
+	identity IdentityService
 }
 
-func NewHandler(users user.Service) *Handler {
-	return &Handler{users: users}
+func NewHandler(users UserService, identity IdentityService) *Handler {
+	return &Handler{
+		users:    users,
+		identity: identity,
+	}
 }
 
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	token, ok := middleware.TokenFromContext(r.Context())
+	identity, ok := h.identity.Unload(r.Context())
 	if !ok {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
 	}
 
-	u, err := h.users.GetOrCreateMe(r.Context(), token)
+	user, err := h.users.GetOrCreateMe(r.Context(), identity)
 	if err != nil {
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	_ = json.NewEncoder(w).Encode(u)
+	_ = json.NewEncoder(w).Encode(user)
 }

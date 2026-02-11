@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 
+	"github.com/aygumov-g/service-users-go/internal/domain/identity"
 	"github.com/aygumov-g/service-users-go/internal/domain/user"
 )
 
@@ -19,16 +20,11 @@ func NewService(repo Repository, sso SSOClient) *Service {
 	}
 }
 
-func (s *Service) GetOrCreateMe(ctx context.Context, token string) (*user.User, error) {
-	identify, err := s.sso.Me(ctx, token)
-	if err != nil {
-		return nil, err
-	}
-
-	u, err := s.repo.GetByID(ctx, identify.ID)
+func (s *Service) GetOrCreateMe(ctx context.Context, idntt identity.Identity) (*user.User, error) {
+	u, err := s.repo.GetByID(ctx, idntt.ID)
 	if err == nil {
-		if u.Login != identify.Login {
-			u.Login = identify.Login
+		if u.Login != idntt.Login {
+			u.Login = idntt.Login
 			u.UpdatedAt = s.clk.Now()
 
 			_ = s.repo.Update(ctx, u)
@@ -43,8 +39,8 @@ func (s *Service) GetOrCreateMe(ctx context.Context, token string) (*user.User, 
 
 	now := s.clk.Now()
 	u = &user.User{
-		ID:        identify.ID,
-		Login:     identify.Login,
+		ID:        idntt.ID,
+		Login:     idntt.Login,
 		CreatedAt: now,
 		UpdatedAt: now,
 	}

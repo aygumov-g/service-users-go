@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
+	"github.com/aygumov-g/service-users-go/internal/domain/identity"
 	"github.com/aygumov-g/service-users-go/internal/domain/user"
-	"github.com/aygumov-g/service-users-go/internal/integration/sso"
 )
 
 type Repository interface {
@@ -15,7 +15,7 @@ type Repository interface {
 }
 
 type SSOClient interface {
-	Me(ctx context.Context, token string) (*sso.Identify, error)
+	Me(ctx context.Context, token string) (*identity.Identity, error)
 }
 
 type Clock interface {
