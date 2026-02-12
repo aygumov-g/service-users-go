@@ -1,6 +1,6 @@
 package identity
 
 type Identity struct {
-	ID    int64
-	Login string
+	ID   int64
+	Role string
 }

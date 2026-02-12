@@ -1,16 +1,14 @@
-package me
+package users
 
 import (
 	"context"
 
 	d_identity "github.com/aygumov-g/service-users-go/internal/domain/identity"
 	d_user "github.com/aygumov-g/service-users-go/internal/domain/user"
-	srv_user "github.com/aygumov-g/service-users-go/internal/service/user"
 )
 
 type UserService interface {
-	GetOrCreateMe(ctx context.Context, idntt *d_identity.Identity) (*d_user.User, error)
-	UpdateMe(ctx context.Context, id int64, input srv_user.UpdateInput) (*d_user.User, error)
+	GetByIDWithAccess(ctx context.Context, identity *d_identity.Identity, targetID int64) (*d_user.User, error)
 }
 
 type IdentityHTTP interface {

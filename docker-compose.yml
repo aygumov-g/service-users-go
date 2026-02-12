@@ -31,12 +31,12 @@ services:
       service-users-db:
         condition: service_healthy
     restart: "no"
-  service-users-go-app:
+  service-users-app-go:
     build:
       context: .
       dockerfile: Dockerfile
-    image: aygumov-g/service-users-go-app:latest
-    container_name: users-go-app
+    image: aygumov-g/service-users-app-go:latest
+    container_name: users-app-go
     environment:
       - APP_PORT=$APP_PORT
       - POSTGRES_HOST=$POSTGRES_HOST
@@ -45,6 +45,9 @@ services:
       - POSTGRES_DB=$POSTGRES_DB
     ports:
       - "$APP_PORT:$APP_PORT"
+    networks:
+      - default
+      - messenger-system
     depends_on:
       service-users-db:
         condition: service_healthy
@@ -54,3 +57,7 @@ services:
 
 volumes:
   pgdata-service-users:
+
+networks:
+  messenger-system:
+    external: true

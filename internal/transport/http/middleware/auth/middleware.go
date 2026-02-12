@@ -7,10 +7,10 @@ import (
 
 type Middleware struct {
 	sso      SSOClient
-	identity IdentityService
+	identity IdentityHTTP
 }
 
-func NewMiddleware(sso SSOClient, identity IdentityService) *Middleware {
+func NewMiddleware(sso SSOClient, identity IdentityHTTP) *Middleware {
 	return &Middleware{
 		sso:      sso,
 		identity: identity,
@@ -33,7 +33,7 @@ func (m *Middleware) Handle(next http.Handler) http.Handler {
 			return
 		}
 
-		ctx := m.identity.Upload(r.Context(), *idntt)
+		ctx := m.identity.Upload(r.Context(), idntt)
 
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})

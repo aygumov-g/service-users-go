@@ -1,4 +1,4 @@
-package auth
+package sso
 
 import (
 	"context"
@@ -6,10 +6,6 @@ import (
 	d_identity "github.com/aygumov-g/service-users-go/internal/domain/identity"
 )
 
-type SSOClient interface {
+type Client interface {
 	Me(ctx context.Context, token string) (*d_identity.Identity, error)
-}
-
-type IdentityHTTP interface {
-	Upload(ctx context.Context, idntt *d_identity.Identity) context.Context
 }

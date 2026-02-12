@@ -4,9 +4,10 @@ import (
 	"context"
 	"errors"
 
-	"github.com/aygumov-g/service-users-go/internal/domain/user"
-	u "github.com/aygumov-g/service-users-go/internal/service/user"
+	d_user "github.com/aygumov-g/service-users-go/internal/domain/user"
+	srv_user "github.com/aygumov-g/service-users-go/internal/service/user"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -18,13 +19,71 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 	return &Repository{db: db}
 }
 
-func (r *Repository) GetByID(ctx context.Context, id int64) (*user.User, error) {
+// func (r *Repository) Upsert(ctx context.Context, userIn *user.User) (*user.User, error) {
+// 	row := r.db.QueryRow(
+// 		ctx,
+// 		`
+// 		INSERT INTO users (
+// 			id,
+// 			first_name,
+// 			last_name,
+// 			bio,
+// 			avatar_url,
+// 			created_at,
+// 			updated_at
+// 		)
+// 		VALUES ($1, $2, $3, $4, $5, $6, $7)
+// 		ON CONFLICT (id) DO UPDATE
+// 		SET
+// 			first_name = EXCLUDED.first_name,
+// 			last_name = EXCLUDED.last_name,
+// 			bio = EXCLUDED.bio,
+// 			avatar_url = EXCLUDED.avatar_url,
+// 			updated_at = EXCLUDED.updated_at
+// 		RETURNING
+// 			id,
+// 			first_name,
+// 			last_name,
+// 			bio,
+// 			avatar_url,
+// 			created_at,
+// 			updated_at
+// 		`,
+// 		userIn.ID,
+// 		userIn.FirstName,
+// 		userIn.LastName,
+// 		userIn.Bio,
+// 		userIn.AvatarURL,
+// 		userIn.CreatedAt,
+// 		userIn.UpdatedAt,
+// 	)
+
+// 	var userOut user.User
+// 	if err := row.Scan(
+// 		&userOut.ID,
+// 		&userOut.FirstName,
+// 		&userOut.LastName,
+// 		&userOut.Bio,
+// 		&userOut.AvatarURL,
+// 		&userOut.CreatedAt,
+// 		&userOut.UpdatedAt,
+// 	); err != nil {
+// 		return nil, err
+// 	}
+
+// 	return &userOut, nil
+// }
+
+func (r *Repository) GetByID(ctx context.Context, id int64) (*d_user.User, error) {
 	row := r.db.QueryRow(
-		context.Background(),
+		ctx,
 		`
 		SELECT
 			id,
-			login,
+			first_name,
+			last_name,
+			bio,
+			avatar_url,
 			created_at,
 			updated_at
 		FROM users
@@ -33,57 +92,82 @@ func (r *Repository) GetByID(ctx context.Context, id int64) (*user.User, error) 
 		id,
 	)
 
-	var user user.User
+	var userOut d_user.User
 	if err := row.Scan(
-		&user.ID,
-		&user.Login,
-		&user.CreatedAt,
-		&user.UpdatedAt,
+		&userOut.ID,
+		&userOut.FirstName,
+		&userOut.LastName,
+		&userOut.Bio,
+		&userOut.AvatarURL,
+		&userOut.CreatedAt,
+		&userOut.UpdatedAt,
 	); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, u.ErrUserNotFound
+			return nil, srv_user.ErrUserNotFound
 		}
 
 		return nil, err
 	}
 
-	return &user, nil
+	return &userOut, nil
 }
 
-func (r *Repository) Create(ctx context.Context, user *user.User) error {
+func (r *Repository) Create(ctx context.Context, user *d_user.User) error {
 	_, err := r.db.Exec(
-		context.Background(),
+		ctx,
 		`
 		INSERT INTO users (
 			id,
-			login,
+			first_name,
+			last_name,
+			bio,
+			avatar_url,
 			created_at,
 			updated_at
 		)
-		VALUES ($1, $2, $3, $4)
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
 		`,
 		user.ID,
-		user.Login,
+		user.FirstName,
+		user.LastName,
+		user.Bio,
+		user.AvatarURL,
 		user.CreatedAt,
 		user.UpdatedAt,
 	)
 
-	return err
+	if err != nil {
+		if pgErr, ok := err.(*pgconn.PgError); ok {
+			if pgErr.Code == "23505" {
+				return srv_user.ErrUserAlreadyExists
+			}
+		}
+
+		return err
+	}
+
+	return nil
 }
 
-func (r *Repository) Update(ctx context.Context, user *user.User) error {
+func (r *Repository) Update(ctx context.Context, user *d_user.User) error {
 	_, err := r.db.Exec(
-		context.Background(),
+		ctx,
 		`
 		UPDATE users
 		SET
-			login = $1,
-			updated_at = $2
-		WHERE id = $3
+			first_name = $2,
+			last_name = $3,
+			bio = $4,
+			avatar_url = $5,
+			updated_at = $6
+		WHERE id = $1
 		`,
-		user.Login,
-		user.UpdatedAt,
 		user.ID,
+		user.FirstName,
+		user.LastName,
+		user.Bio,
+		user.AvatarURL,
+		user.UpdatedAt,
 	)
 
 	return err
