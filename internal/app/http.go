@@ -6,7 +6,7 @@ import (
 
 	"github.com/aygumov-g/service-users-go/internal/config"
 	"github.com/aygumov-g/service-users-go/internal/integration/sso"
-	user_repo "github.com/aygumov-g/service-users-go/internal/repository/user/postgres"
+	user_repo "github.com/aygumov-g/service-users-go/internal/repository/postgres/user"
 	user_srv "github.com/aygumov-g/service-users-go/internal/service/user"
 	me_handler "github.com/aygumov-g/service-users-go/internal/transport/http/handler/me"
 	users_handler "github.com/aygumov-g/service-users-go/internal/transport/http/handler/users"

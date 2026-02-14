@@ -27,13 +27,13 @@ func (m *Middleware) Handle(next http.Handler) http.Handler {
 
 		token := strings.TrimPrefix(h, "Bearer ")
 
-		idntt, err := m.sso.Me(r.Context(), token)
+		identity, err := m.sso.Me(r.Context(), token)
 		if err != nil {
 			http.Error(w, "unauthorized", http.StatusUnauthorized)
 			return
 		}
 
-		ctx := m.identity.Upload(r.Context(), idntt)
+		ctx := m.identity.Upload(r.Context(), identity)
 
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
