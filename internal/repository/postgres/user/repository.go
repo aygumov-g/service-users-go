@@ -92,15 +92,15 @@ func (r *Repository) GetByID(ctx context.Context, id int64) (*d_user.User, error
 		id,
 	)
 
-	var userOut d_user.User
+	var user d_user.User
 	if err := row.Scan(
-		&userOut.ID,
-		&userOut.FirstName,
-		&userOut.LastName,
-		&userOut.Bio,
-		&userOut.AvatarURL,
-		&userOut.CreatedAt,
-		&userOut.UpdatedAt,
+		&user.ID,
+		&user.FirstName,
+		&user.LastName,
+		&user.Bio,
+		&user.AvatarURL,
+		&user.CreatedAt,
+		&user.UpdatedAt,
 	); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, srv_user.ErrUserNotFound
@@ -109,7 +109,7 @@ func (r *Repository) GetByID(ctx context.Context, id int64) (*d_user.User, error
 		return nil, err
 	}
 
-	return &userOut, nil
+	return &user, nil
 }
 
 func (r *Repository) Create(ctx context.Context, user *d_user.User) error {
