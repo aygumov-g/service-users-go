@@ -1,4 +1,4 @@
-package me
+package users
 
 import "github.com/aygumov-g/service-users-go/internal/domain/user"
 

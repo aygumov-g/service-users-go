@@ -7,7 +7,6 @@ import (
 	"strconv"
 
 	"github.com/aygumov-g/service-users-go/internal/service/user"
-	"github.com/aygumov-g/service-users-go/internal/transport/http/handler/me"
 )
 
 type Handler struct {
@@ -53,17 +52,16 @@ func (h *Handler) get(w http.ResponseWriter, r *http.Request) {
 		switch {
 		case errors.Is(err, user.ErrForbidden):
 			http.Error(w, "forbidden", http.StatusForbidden)
-			return
 		case errors.Is(err, user.ErrUserNotFound):
 			http.Error(w, "user not found", http.StatusForbidden)
-			return
+		default:
+			http.Error(w, "internal error", http.StatusInternalServerError)
 		}
 
-		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
 
-	var resp me.UserResponse
+	var resp userResponse
 	w.Header().Set("Content-Type", "application/json")
-	_ = json.NewEncoder(w).Encode(resp.ToResponse(u))
+	_ = json.NewEncoder(w).Encode(resp.toResponse(u))
 }

@@ -39,9 +39,9 @@ func (h *Handler) get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var resp UserResponse
+	var resp userResponse
 	w.Header().Set("Content-Type", "application/json")
-	_ = json.NewEncoder(w).Encode(resp.ToResponse(user))
+	_ = json.NewEncoder(w).Encode(resp.toResponse(user))
 }
 
 func (h *Handler) update(w http.ResponseWriter, r *http.Request) {
@@ -51,7 +51,7 @@ func (h *Handler) update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var req UpdateRequest
+	var req updateRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "bad request", http.StatusBadRequest)
 		return
@@ -63,7 +63,7 @@ func (h *Handler) update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var resp UserResponse
+	var resp userResponse
 	w.Header().Set("Content-Type", "application/json")
-	_ = json.NewEncoder(w).Encode(resp.ToResponse(user))
+	_ = json.NewEncoder(w).Encode(resp.toResponse(user))
 }
